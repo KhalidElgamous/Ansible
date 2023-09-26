@@ -1,0 +1,64 @@
+version: '3'
+
+
+volumes:
+  postgres-db-volume:
+  # mysql-db-volume:
+    driver: local
+
+services:
+
+  # mysql:
+  #   image: mysql:8.0
+  #   hostname: mysql
+  #   volumes:
+  #     - mysql-db-volume:/var/lib/mysql
+  #   environment:
+  #     - MYSQL_RANDOM_ROOT_PASSWORD=yes
+  #     - MYSQL_DATABASE=semaphore
+  #     - MYSQL_USER=semaphore
+  #     - MYSQL_PASSWORD=semaphore
+  #   restart: unless-stopped
+    # networks:
+    #   my-network:
+    #     ipv4_address: 10.7.0.7
+
+  postgres:
+    image: postgres:13
+    hostname: postgres
+    container_name: postgres
+    environment:
+      POSTGRES_USER: semaphore
+      POSTGRES_PASSWORD: semaphore
+      POSTGRES_DB: semaphore
+    volumes:
+      - postgres-db-volume:/var/lib/postgresql/data
+    restart: always
+
+  semaphore:
+    container_name: semaphoreui
+    image: semaphoreui/semaphore:v2.8.90
+    user: 0:0
+    ports:
+      - 3000:3000
+    environment:
+      - SEMAPHORE_DB_USER=semaphore
+      - SEMAPHORE_DB_PASS=semaphore
+      - SEMAPHORE_DB_HOST=postgres
+      - SEMAPHORE_DB_PORT=5432
+      - SEMAPHORE_DB_DIALECT=postgres
+      - SEMAPHORE_DB=semaphore
+      - SEMAPHORE_PLAYBOOK_PATH=/tmp/semaphore/
+      - SEMAPHORE_ADMIN_PASSWORD=elgamous
+      - SEMAPHORE_ADMIN_NAME=admin
+      - SEMAPHORE_ADMIN_EMAIL=admin@localhost
+      - SEMAPHORE_ADMIN=admin
+      - SEMAPHORE_ACCESS_KEY_ENCRYPTION=  # add to your access key encryption !
+      - ANSIBLE_HOST_KEY_CHECKING=false  # (optional) change to true if you want to enable host key checking
+    volumes:
+      - ./inventory/:/inventory:ro
+      - ./authorized-keys/:/authorized-keys:ro
+      - ./config/:/etc/semaphore:rw
+    restart: always
+    depends_on:
+      - postgres
