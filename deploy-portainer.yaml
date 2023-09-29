@@ -7,6 +7,31 @@
   become_user: "{{ lookup('env','USER') }}"
   
   tasks:
+
+
+
+
+  - name: Add source command to ~/.bashrc
+    ansible.builtin.lineinfile:
+      path: ~/.bashrc
+      line: 'source /opt/rh/rh-python38/enable'
+      create: yes
+  
+  - name: Reload ~/.bashrc
+    ansible.builtin.shell: source ~/.bashrc
+    args:
+      executable: /bin/bash
+  
+  - name: Verify rh-python38 installation
+    ansible.builtin.shell: python3 --version
+    register: python_version
+    changed_when: true
+  
+  - name: Display Python version
+    ansible.builtin.debug:
+      var: python_version.stdout_lines
+
+  
   
   - name: create new volume
     community.docker.docker_volume:
