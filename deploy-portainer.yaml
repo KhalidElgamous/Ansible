@@ -10,6 +10,14 @@
 
 
 
+  - name: Enable rh-python38
+    ansible.builtin.shell: source /opt/rh/rh-python38/enable
+    environment:
+      PATH: "{{ ansible_env.PATH }}:/opt/rh/rh-python38/root/usr/bin"
+    args:
+      executable: /bin/bash
+    register: enable_result
+    changed_when: false  # Mark as unchanged so it doesn't always report a change
 
   - name: Add source command to ~/.bashrc
     ansible.builtin.lineinfile:
